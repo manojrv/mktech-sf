@@ -7,7 +7,7 @@ on:
       - 'force-app/**'
 
 jobs:
-  Deploy-to-sffnoobs-environment:
+  Deploy-to-mktech-environment:
       runs-on: ubuntu-latest
       environment: sffnoobs
       steps:
