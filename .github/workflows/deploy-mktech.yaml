@@ -34,8 +34,26 @@ jobs:
                 echo "[INFO] Diff generated"
                 
           - name: 'Deploy to environment with running all local tests'
-            run: |
-                echo "${{ secrets.JWT_SERVER_KEY }}" > server.key
-                sf org login jwt --username ${{ secrets.DEPLOYMENT_USER_NAME }} --jwt-key-file server.key --client-id ${{ secrets.CONSUMER_KEY }} --instance-url ${{ vars.INSTANCE_URL }} --set-default
-                sf project deploy start --source-dir changed-sources/force-app --test-level RunLocalTests
-                rm server.key
+  run: |
+      # Recreate RSA private key from GitHub Secret
+      echo "${{ secrets.JWT_SERVER_KEY }}" | base64 --decode > server.key
+      chmod 600 server.key
+
+      # Optional but STRONGLY recommended (temporary)
+      openssl rsa -in server.key -check -noout
+
+      # Authenticate using JWT
+      sf org login jwt \
+        --username ${{ secrets.DEPLOYMENT_USER_NAME }} \
+        --jwt-key-file server.key \
+        --client-id ${{ secrets.CONSUMER_KEY }} \
+        --instance-url ${{ vars.INSTANCE_URL }} \
+        --set-default
+
+      # Deploy delta
+      sf project deploy start \
+        --source-dir changed-sources/force-app \
+        --test-level RunLocalTests
+
+      # Cleanup
+      rm server.key
