@@ -9,7 +9,7 @@ on:
 jobs:
   Deploy-to-mktech-environment:
       runs-on: ubuntu-latest
-      environment: sffnoobs
+      environment: mktech
       steps:
           - uses: actions/setup-node@v3
             with:
